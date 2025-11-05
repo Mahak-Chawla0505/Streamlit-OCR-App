@@ -29,3 +29,22 @@ if uploaded_file:
             st.download_button("💾 Download Text", text_bytes, file_name="extracted_text.txt")
         else:
             st.warning("No text detected in the image.")
+
+# Upload reference text
+reference_file = st.file_uploader("📄 Upload Ground Truth Text (Optional)", type=["txt"])
+
+# After OCR extraction
+if st.button("🔍 Extract Text", key="extract_button"):
+    with st.spinner("Running OCR..."):
+        extracted_text = pytesseract.image_to_string(image)
+
+    if extracted_text.strip():
+        st.success("✅ Text extracted successfully!")
+        st.text_area("📜 Extracted Text", extracted_text, height=300)
+
+        # Accuracy comparison
+        if reference_file:
+            reference_text = reference_file.read().decode("utf-8")
+            from difflib import SequenceMatcher
+            similarity = SequenceMatcher(None, extracted_text.strip(), reference_text.strip()).ratio()
+            st.metric("🧪 OCR Accuracy", f"{similarity * 100:.2f}%")
